@@ -2,51 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 🔥 Custom styles MUST be inside a layer */
-@layer components {
-  .card {
-    @apply bg-gradient-to-br from-[#0f172a] to-[#020617]
-           border border-white/5
-           shadow-lg
-           rounded-xl
-           text-white;
-  }
+/* Background */
+body {
+  background: linear-gradient(to bottom, #020617, #020617, #0f172a);
+  color: white;
+}
 
-  .btn-primary {
-    @apply bg-gradient-to-r from-orange-400 to-orange-500
-           text-black
-           font-semibold
-           rounded-xl
-           shadow-md
-           active:scale-95
-           transition;
-  }
+/* Card */
+.card {
+  background: linear-gradient(to bottom right, #0f172a, #020617);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
 
-  .btn-success {
-    @apply bg-gradient-to-r from-green-400 to-green-500
-           text-black
-           font-semibold
-           rounded-xl
-           shadow-md;
-  }
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(to right, #fb923c, #f97316);
+  color: black;
+  font-weight: 600;
+  border-radius: 12px;
+}
 
-  .btn-danger {
-    @apply bg-gradient-to-r from-red-400 to-red-500
-           text-black
-           font-semibold
-           rounded-xl
-           shadow-md;
-  }
+.btn-success {
+  background: linear-gradient(to right, #4ade80, #22c55e);
+  color: black;
+  border-radius: 12px;
+}
 
-  .input {
-    @apply border border-white/10
-           bg-black/60
-           rounded-lg
-           p-2
-           text-white
-           placeholder:text-gray-500
-           focus:outline-none
-           focus:ring-2
-           focus:ring-orange-400;
-  }
+.btn-danger {
+  background: linear-gradient(to right, #f87171, #ef4444);
+  color: black;
+  border-radius: 12px;
+}
+
+/* Input */
+.input {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: white;
 }
