@@ -1,26 +1,65 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* 🔥 App Background */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-gradient-to-b from-[#020617] via-[#020617] to-[#0f172a] text-white;
+}
+
+/* 🔥 Card Style */
+.card {
+  @apply bg-gradient-to-br from-[#0f172a] to-[#020617]
+         border border-white/5
+         shadow-lg
+         rounded-xl;
+}
+
+/* 🔥 Primary Button */
+.btn-primary {
+  @apply bg-gradient-to-r from-orange-400 to-orange-500
+         text-black
+         font-semibold
+         rounded-xl
+         shadow-md
+         active:scale-95
+         transition;
+}
+
+/* 🔥 Success Button */
+.btn-success {
+  @apply bg-gradient-to-r from-green-400 to-green-500
+         text-black
+         font-semibold
+         rounded-xl
+         shadow-md
+         active:scale-95;
+}
+
+/* 🔥 Danger Button */
+.btn-danger {
+  @apply bg-gradient-to-r from-red-400 to-red-500
+         text-black
+         font-semibold
+         rounded-xl
+         shadow-md
+         active:scale-95;
+}
+
+/* 🔥 Input */
+.input {
+  @apply border border-white/10
+         bg-black/60
+         rounded-lg
+         p-2
+         text-white
+         placeholder:text-gray-500
+         focus:outline-none
+         focus:ring-2
+         focus:ring-orange-400;
+}
+
+/* 🔥 Glow Text */
+.text-glow-orange {
+  text-shadow: 0 0 6px rgba(251, 146, 60, 0.6);
+}
+
+.text-glow-green {
+  text-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
 }
