@@ -4,133 +4,108 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { addParlay } from "@/lib/store";
 
+type Leg = {
+  playerName: string;
+  odds: string;
+};
+
 export default function AddParlay({ onAdd }: any) {
-  const [legs, setLegs] = useState([
+  const [legs, setLegs] = useState<Leg[]>([
     { playerName: "", odds: "+100" },
   ]);
-
   const [wager, setWager] = useState("");
 
-  // ✅ American → Decimal
-  const americanToDecimal = (odds: number) => {
-    if (odds > 0) return 1 + odds / 100;
-    return 1 + 100 / Math.abs(odds);
-  };
-
-  // ✅ Decimal → American
-  const decimalToAmerican = (decimal: number) => {
-    if (decimal >= 2) return Math.round((decimal - 1) * 100);
-    return Math.round(-100 / (decimal - 1));
-  };
-
-  // ✅ Safe odds parsing
+  // ---- ODDS ----
   const parseOdds = (odds: string) => {
-    const cleaned = odds.replace(/[^0-9-]/g, "");
-    const num = Number(cleaned);
-
-    if (isNaN(num) || num === 0) return null;
-
-    return odds.includes("-") ? -Math.abs(num) : Math.abs(num);
+    if (!odds) return null;
+    const num = Number(odds.replace("+", ""));
+    if (isNaN(num)) return null;
+    return num;
   };
 
-  // ✅ Update leg
-  const updateLeg = (index: number, field: string, value: string) => {
-    const updated = [...legs];
-    updated[index] = { ...updated[index], [field]: value };
-    setLegs(updated);
-  };
+  const americanToDecimal = (odds: number) =>
+    odds > 0 ? 1 + odds / 100 : 1 + 100 / Math.abs(odds);
 
-  // ✅ Add leg
-  const addLeg = () => {
-    setLegs([...legs, { playerName: "", odds: "+100" }]);
-  };
+  const decimalToAmerican = (decimal: number) =>
+    decimal >= 2
+      ? Math.round((decimal - 1) * 100)
+      : Math.round(-100 / (decimal - 1));
 
-  // ✅ Remove leg
-  const removeLeg = (index: number) => {
-    if (legs.length === 1) return;
-    setLegs(legs.filter((_, i) => i !== index));
-  };
-
-  // ✅ Calculate parlay odds
   const calculateParlayOdds = () => {
     const parsed = legs
-      .map((leg) => parseOdds(leg.odds))
+      .map((l) => parseOdds(l.odds))
       .filter((o) => o !== null) as number[];
 
-    if (parsed.length === 0) return 0;
+    if (!parsed.length) return 0;
 
     const decimal = parsed.reduce(
-      (acc, odds) => acc * americanToDecimal(odds),
+      (acc, o) => acc * americanToDecimal(o),
       1
     );
 
     return decimalToAmerican(decimal);
   };
 
-  // ✅ Calculate return
   const calculateReturn = () => {
     const odds = calculateParlayOdds();
-
     if (!wager || odds === 0) return 0;
 
-    const decimal =
-      odds > 0
-        ? 1 + odds / 100
-        : 1 + 100 / Math.abs(odds);
-
+    const decimal = americanToDecimal(odds);
     return Number(wager) * decimal;
   };
 
-  // ✅ Submit
+  // ---- UI ----
+  const addLeg = () =>
+    setLegs([...legs, { playerName: "", odds: "+100" }]);
+
+  const removeLeg = (i: number) => {
+    if (legs.length === 1) return;
+    setLegs(legs.filter((_, idx) => idx !== i));
+  };
+
+  const updateLeg = (i: number, field: keyof Leg, value: string) => {
+    const updated = [...legs];
+    updated[i] = { ...updated[i], [field]: value };
+    setLegs(updated);
+  };
+
   const handleSubmit = () => {
-    const totalOdds = calculateParlayOdds();
-
-    const cleanedLegs = legs.map((leg) => ({
-      playerName: leg.playerName,
-      odds: parseOdds(leg.odds) || 0,
-    }));
-
     const newParlay = {
       id: uuidv4(),
       date: new Date().toISOString(),
-      legs: cleanedLegs,
+      legs: legs.map((l) => ({
+        playerName: l.playerName,
+        odds: parseOdds(l.odds) || 0,
+      })),
       wagerAmount: Number(wager || 0),
-      totalOdds,
+      totalOdds: calculateParlayOdds(),
       result: "PENDING",
     };
 
-    const updated = addParlay(newParlay);
-    onAdd(updated);
-
-    // reset
-    setLegs([{ playerName: "", odds: "+100" }]);
-    setWager("");
+    onAdd(addParlay(newParlay));
   };
 
   return (
-    <div className="p-4 rounded-xl space-y-4 bg-[#0f172a] text-white shadow-lg">
-      <h2 className="font-bold text-lg text-orange-400">
-        Add Parlay
-      </h2>
+    <div className="bg-[#0f172a]/70 backdrop-blur rounded-xl p-4 border border-white/5 shadow-lg space-y-4">
+      <h2 className="text-orange-400 font-semibold">Add Parlay</h2>
 
-      {/* Headers */}
-      <div className="flex gap-2 text-sm font-semibold">
-        <div className="w-full">Player</div>
-        <div className="w-28 text-center">
+      {/* HEADERS */}
+      <div className="flex gap-2 text-xs text-gray-400 px-1">
+        <div className="flex-1">Player</div>
+        <div className="w-24 text-center">
           Odds
-          <div className="text-xs text-gray-400">
-            (+100 / -100)
+          <div className="text-[10px] text-gray-500">
+            (+100 / -120)
           </div>
         </div>
-        <div className="w-6"></div>
       </div>
 
-      {/* Legs */}
+      {/* LEGS */}
       {legs.map((leg, i) => (
-        <div key={i} className="flex gap-2 items-center">
+        <div key={i} className="flex gap-2">
           <input
             placeholder="Player"
-            className="border border-gray-600 bg-black p-2 rounded w-full text-white placeholder:text-gray-400"
+            className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm"
             value={leg.playerName}
             onChange={(e) =>
               updateLeg(i, "playerName", e.target.value)
@@ -138,10 +113,8 @@ export default function AddParlay({ onAdd }: any) {
           />
 
           <input
-            type="text"
-            placeholder="+100"
-            className="border border-gray-600 bg-black p-2 rounded w-28 text-center text-white placeholder:text-gray-400"
             value={leg.odds}
+            className="w-24 text-center bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-sm"
             onChange={(e) =>
               updateLeg(i, "odds", e.target.value)
             }
@@ -156,48 +129,50 @@ export default function AddParlay({ onAdd }: any) {
         </div>
       ))}
 
-      <button onClick={addLeg} className="text-blue-400 text-sm">
+      <button
+        onClick={addLeg}
+        className="text-blue-400 text-sm"
+      >
         + Add Leg
       </button>
 
-      {/* Wager + Return */}
+      {/* WAGER + RETURN SIDE BY SIDE */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-sm text-gray-300 font-medium">
-            Wager
+        <div>
+          <label className="text-xs text-gray-400">
+            Wager Amount
           </label>
-
           <input
+            placeholder="$10.00"
             value={wager}
             onChange={(e) =>
               setWager(e.target.value.replace(/[^0-9.]/g, ""))
             }
-            className="border border-gray-600 bg-black p-2 rounded w-full text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="$10.00"
+            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm mt-1"
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="text-sm text-gray-300 font-medium">
-            Potential Return
+        <div>
+          <label className="text-xs text-gray-400">
+            Potential Winnings
           </label>
-
-          <div className="p-2 w-full text-green-400 font-semibold text-xl">
+          <div className="mt-1 px-3 py-2 text-green-400 font-semibold text-sm">
             ${calculateReturn().toFixed(2)}
           </div>
         </div>
       </div>
 
-      {/* Odds */}
-      <div className="text-sm font-semibold text-orange-400">
-        Parlay Odds:{" "}
+      {/* PARLAY ODDS */}
+      <div className="text-orange-400 font-semibold text-sm">
+        Total Odds:{" "}
         {calculateParlayOdds() > 0 ? "+" : ""}
         {calculateParlayOdds()}
       </div>
 
+      {/* BUTTON */}
       <button
         onClick={handleSubmit}
-        className="bg-orange-500 hover:bg-orange-600 text-black w-full p-2 rounded-xl font-semibold"
+        className="w-full py-2 rounded-xl bg-orange-500 text-black font-semibold"
       >
         Save Parlay
       </button>

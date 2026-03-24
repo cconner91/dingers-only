@@ -7,13 +7,13 @@ export default function TopNav() {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-0 z-50 bg-[#020617] px-4 pt-3 pb-2">
-      <div className="flex bg-[#0f172a] rounded-lg p-1">
+    <div className="sticky top-0 z-50 px-4 pt-4 pb-2 bg-[#020617]/80 backdrop-blur-xl border-b border-white/5">
+      <div className="flex bg-[#0f172a]/80 rounded-2xl p-1 shadow-inner">
         <Link
           href="/"
-          className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition ${
+          className={`flex-1 text-center py-2 text-sm font-semibold rounded-xl transition ${
             pathname === "/"
-              ? "bg-orange-500 text-black"
+              ? "bg-gradient-to-r from-orange-400 to-orange-500 text-black shadow-lg"
               : "text-gray-400"
           }`}
         >
@@ -22,9 +22,9 @@ export default function TopNav() {
 
         <Link
           href="/stats"
-          className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition ${
+          className={`flex-1 text-center py-2 text-sm font-semibold rounded-xl transition ${
             pathname === "/stats"
-              ? "bg-orange-500 text-black"
+              ? "bg-gradient-to-r from-orange-400 to-orange-500 text-black shadow-lg"
               : "text-gray-400"
           }`}
         >
