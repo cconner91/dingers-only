@@ -1,35 +1,51 @@
-import { Parlay } from "@/types/parlay";
-
-const STORAGE_KEY = "dingers_parlays";
-
-export const getParlays = (): Parlay[] => {
+export const getParlays = () => {
   if (typeof window === "undefined") return [];
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-};
-
-export const saveParlays = (parlays: Parlay[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(parlays));
+  return JSON.parse(localStorage.getItem("parlays") || "[]");
 };
 
 export const addParlay = (parlay: any) => {
-  const current = getParlays();
-  const updated = [parlay, ...current];
-  saveParlays(updated);
+  const existing = getParlays();
+  const updated = [parlay, ...existing];
+
+  localStorage.setItem("parlays", JSON.stringify(updated));
   return updated;
 };
 
 export const deleteParlay = (id: string) => {
-  const current = getParlays();
-  const updated = current.filter((p) => p.id !== id);
-  saveParlays(updated);
+  const existing = getParlays();
+  const updated = existing.filter((p: any) => p.id !== id);
+
+  localStorage.setItem("parlays", JSON.stringify(updated));
   return updated;
 };
 
 export const updateParlay = (updatedParlay: any) => {
-  const current = getParlays();
-  const updated = current.map((p) =>
-    p.id === updatedParlay.id ? updatedParlay : p
-  );
-  saveParlays(updated);
+  const existing = getParlays();
+
+  const updated = existing.map((p: any) => {
+    if (p.id !== updatedParlay.id) return p;
+
+    let profit = 0;
+
+    if (updatedParlay.result === "WIN") {
+      const decimal =
+        updatedParlay.totalOdds > 0
+          ? 1 + updatedParlay.totalOdds / 100
+          : 1 + 100 / Math.abs(updatedParlay.totalOdds);
+
+      profit = updatedParlay.wagerAmount * (decimal - 1);
+    }
+
+    if (updatedParlay.result === "LOSS") {
+      profit = -updatedParlay.wagerAmount;
+    }
+
+    return {
+      ...updatedParlay,
+      profit,
+    };
+  });
+
+  localStorage.setItem("parlays", JSON.stringify(updated));
   return updated;
 };
